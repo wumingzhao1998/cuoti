@@ -2,11 +2,17 @@
 图片处理工具
 """
 
-import cv2
-import numpy as np
 from PIL import Image
 from typing import Tuple, Optional
 from pathlib import Path
+
+# 尝试导入opencv，如果失败则只使用Pillow
+try:
+    import cv2
+    import numpy as np
+    HAS_OPENCV = True
+except ImportError:
+    HAS_OPENCV = False
 
 
 class ImageProcessor:
@@ -24,6 +30,14 @@ class ImageProcessor:
         Returns:
             处理后的图片路径
         """
+        if HAS_OPENCV:
+            return ImageProcessor._preprocess_opencv(image_path, output_path)
+        else:
+            return ImageProcessor._preprocess_pillow(image_path, output_path)
+    
+    @staticmethod
+    def _preprocess_opencv(image_path: str, output_path: Optional[str] = None) -> str:
+        """使用OpenCV预处理"""
         img = cv2.imread(image_path)
         if img is None:
             raise ValueError(f"无法读取图片: {image_path}")
@@ -43,6 +57,27 @@ class ImageProcessor:
             output_path = str(Path(image_path).parent / f"processed_{Path(image_path).name}")
         
         cv2.imwrite(output_path, denoised)
+        return output_path
+    
+    @staticmethod
+    def _preprocess_pillow(image_path: str, output_path: Optional[str] = None) -> str:
+        """使用Pillow预处理（Vercel部署时使用）"""
+        img = Image.open(image_path)
+        
+        # 转换为灰度图
+        if img.mode != 'L':
+            img = img.convert('L')
+        
+        # 增强对比度
+        from PIL import ImageEnhance
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.3)
+        
+        # 保存
+        if output_path is None:
+            output_path = str(Path(image_path).parent / f"processed_{Path(image_path).name}")
+        
+        img.save(output_path)
         return output_path
     
     @staticmethod

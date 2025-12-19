@@ -2,10 +2,18 @@
 去手写处理
 """
 
-import cv2
-import numpy as np
 from typing import Optional
 from pathlib import Path
+
+# 尝试导入opencv，如果失败则使用Pillow作为替代
+try:
+    import cv2
+    import numpy as np
+    HAS_OPENCV = True
+except ImportError:
+    HAS_OPENCV = False
+    from PIL import Image
+    import io
 
 
 class HandwritingRemover:
@@ -13,7 +21,12 @@ class HandwritingRemover:
     
     def __init__(self):
         """初始化去手写处理器"""
-        pass
+        if not HAS_OPENCV:
+            import warnings
+            warnings.warn(
+                "opencv-python未安装，去手写功能将使用基础方法。"
+                "建议安装opencv-python以获得更好的效果，或使用外部图像处理API。"
+            )
     
     def remove_handwriting(self, image_path: str, output_path: Optional[str] = None) -> str:
         """
@@ -28,6 +41,14 @@ class HandwritingRemover:
         Returns:
             处理后的图片路径
         """
+        if HAS_OPENCV:
+            return self._remove_handwriting_opencv(image_path, output_path)
+        else:
+            # 使用Pillow的基础处理（效果有限）
+            return self._remove_handwriting_pillow(image_path, output_path)
+    
+    def _remove_handwriting_opencv(self, image_path: str, output_path: Optional[str] = None) -> str:
+        """使用OpenCV进行去手写处理"""
         img = cv2.imread(image_path)
         if img is None:
             raise ValueError(f"无法读取图片: {image_path}")
@@ -42,17 +63,6 @@ class HandwritingRemover:
         # 开运算：先腐蚀后膨胀，可以去除小的噪点
         opened = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel, iterations=1)
         
-        # 方法2：使用阈值处理
-        # 假设手写笔迹比印刷文字颜色深
-        _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
-        
-        # 方法3：使用边缘检测，然后填充
-        edges = cv2.Canny(gray, 50, 150)
-        
-        # 组合多种方法
-        # 这里使用一个简单的策略：保留印刷文字，去除手写
-        # 实际应用中可能需要更复杂的算法
-        
         # 将处理后的灰度图转换回BGR
         result = cv2.cvtColor(opened, cv2.COLOR_GRAY2BGR)
         
@@ -61,6 +71,27 @@ class HandwritingRemover:
             output_path = str(Path(image_path).parent / f"cleaned_{Path(image_path).name}")
         
         cv2.imwrite(output_path, result)
+        return output_path
+    
+    def _remove_handwriting_pillow(self, image_path: str, output_path: Optional[str] = None) -> str:
+        """使用Pillow进行基础处理（Vercel部署时使用）"""
+        # 基础处理：增强对比度，减少手写痕迹
+        img = Image.open(image_path)
+        
+        # 转换为灰度图
+        if img.mode != 'L':
+            img = img.convert('L')
+        
+        # 增强对比度（简单方法）
+        from PIL import ImageEnhance
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.5)
+        
+        # 保存结果
+        if output_path is None:
+            output_path = str(Path(image_path).parent / f"cleaned_{Path(image_path).name}")
+        
+        img.save(output_path)
         return output_path
     
     def remove_handwriting_advanced(self, image_path: str, output_path: Optional[str] = None) -> str:

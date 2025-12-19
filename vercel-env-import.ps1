@@ -1,26 +1,26 @@
-# Vercel环境变量批量导入脚本 (PowerShell版本)
+# Vercel Environment Variables Batch Import Script (PowerShell)
 
-# 检查是否安装了Vercel CLI
+# Check if Vercel CLI is installed
 if (-not (Get-Command vercel -ErrorAction SilentlyContinue)) {
-    Write-Host "错误: 未安装Vercel CLI" -ForegroundColor Red
-    Write-Host "请先安装: npm i -g vercel" -ForegroundColor Yellow
+    Write-Host "Error: Vercel CLI not installed" -ForegroundColor Red
+    Write-Host "Please install: npm i -g vercel" -ForegroundColor Yellow
     exit 1
 }
 
-# 检查是否已登录
+# Check if logged in
 try {
     vercel whoami | Out-Null
 } catch {
-    Write-Host "请先登录Vercel:" -ForegroundColor Yellow
+    Write-Host "Please login to Vercel:" -ForegroundColor Yellow
     vercel login
 }
 
-# 读取.env.vercel文件并导入环境变量
-Write-Host "开始导入环境变量..." -ForegroundColor Green
+# Read .env.vercel file and import environment variables
+Write-Host "Starting environment variables import..." -ForegroundColor Green
 
 $envFile = ".env.vercel"
 if (-not (Test-Path $envFile)) {
-    Write-Host "错误: 找不到 $envFile 文件" -ForegroundColor Red
+    Write-Host "Error: Cannot find $envFile file" -ForegroundColor Red
     exit 1
 }
 
@@ -38,12 +38,12 @@ Get-Content $envFile | ForEach-Object {
         $value = $matches[2].Trim()
         
         if ($key -and $value) {
-            Write-Host "导入: $key" -ForegroundColor Cyan
+            Write-Host "Importing: $key" -ForegroundColor Cyan
             $value | vercel env add "$key" production preview development
         }
     }
 }
 
-Write-Host "`n环境变量导入完成！" -ForegroundColor Green
-Write-Host "请在Vercel Dashboard中验证所有变量是否已正确添加" -ForegroundColor Yellow
+Write-Host "`nEnvironment variables import completed!" -ForegroundColor Green
+Write-Host "Please verify all variables in Vercel Dashboard" -ForegroundColor Yellow
 
