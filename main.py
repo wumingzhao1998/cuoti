@@ -14,8 +14,27 @@ sys.path.insert(0, str(Path(__file__).parent))
 try:
     import config
 except ImportError:
-    print("错误：请先复制 config.example.py 为 config.py 并配置相关参数")
-    sys.exit(1)
+    # 在Vercel环境中，config可能不存在，使用环境变量
+    import os
+    import types
+    config = types.ModuleType('config')
+    config.FEISHU_APP_ID = os.getenv('FEISHU_APP_ID', '')
+    config.FEISHU_APP_SECRET = os.getenv('FEISHU_APP_SECRET', '')
+    config.FEISHU_APP_TOKEN = os.getenv('FEISHU_APP_TOKEN', '')
+    config.FEISHU_TABLE_ID = os.getenv('FEISHU_TABLE_ID', '')
+    config.FEISHU_FEEDBACK_TABLE_ID = os.getenv('FEISHU_FEEDBACK_TABLE_ID', '')
+    config.DOUBAO_API_KEY = os.getenv('DOUBAO_API_KEY', '')
+    config.DOUBAO_API_URL = os.getenv('DOUBAO_API_URL', 'https://ark.cn-beijing.volces.com/api/v3/chat/completions')
+    config.DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+    config.DEEPSEEK_API_URL = os.getenv('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1')
+    config.OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+    config.OPENAI_BASE_URL = os.getenv('OPENAI_BASE_URL', 'https://api.openai.com/v1')
+    config.APP_NAME = os.getenv('APP_NAME', '错题思维')
+    config.APP_VERSION = os.getenv('APP_VERSION', '1.0.0')
+    config.DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+    config.UPLOAD_DIR = os.getenv('UPLOAD_DIR', 'uploads')
+    config.MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', str(10 * 1024 * 1024)))
+    sys.modules['config'] = config
 
 from src.feishu import FeishuClient
 from src.feishu.models import ErrorRecord
