@@ -4,6 +4,7 @@ Vercel Serverless Function入口
 
 import os
 import sys
+import json
 from pathlib import Path
 
 # 添加项目根目录到路径
@@ -24,14 +25,54 @@ from main import ErrorQuestionApp
 app = ErrorQuestionApp()
 
 def handler(request):
-    """Vercel Serverless Function处理函数"""
-    # 这里可以根据需要实现HTTP接口
-    # 目前返回简单的响应
-    return {
-        'statusCode': 200,
-        'body': {
-            'message': '错题思维应用已部署',
-            'version': '1.0.0'
+    """
+    Vercel Serverless Function处理函数
+    
+    Args:
+        request: Vercel请求对象
+        
+    Returns:
+        HTTP响应
+    """
+    # 获取请求方法和路径
+    method = request.get('method', 'GET')
+    path = request.get('path', '/')
+    
+    # 处理根路径
+    if path == '/' or path == '':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'body': json.dumps({
+                'message': '错题思维应用已部署',
+                'version': '1.0.0',
+                'status': 'running'
+            }, ensure_ascii=False)
         }
+    
+    # 处理健康检查
+    if path == '/health':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'body': json.dumps({
+                'status': 'healthy'
+            }, ensure_ascii=False)
+        }
+    
+    # 其他路径返回404
+    return {
+        'statusCode': 404,
+        'headers': {
+            'Content-Type': 'application/json'
+        },
+        'body': json.dumps({
+            'error': 'Not Found',
+            'path': path
+        }, ensure_ascii=False)
     }
 
