@@ -11,9 +11,13 @@ from typing import Optional
 # 添加项目根目录到路径
 sys.path.insert(0, str(Path(__file__).parent))
 
+# 尝试导入config，如果失败则从环境变量创建
 try:
     import config
-except ImportError:
+    # 如果config模块存在但可能是虚拟模块，检查是否有必要的属性
+    if not hasattr(config, 'FEISHU_APP_ID'):
+        raise ImportError("Config module exists but missing required attributes")
+except (ImportError, AttributeError):
     # 在Vercel环境中，config可能不存在，使用环境变量
     import os
     import types
