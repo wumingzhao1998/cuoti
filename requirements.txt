@@ -1,0 +1,23 @@
+# 核心依赖
+requests>=2.31.0
+Pillow>=10.0.0
+python-dotenv>=1.0.0
+
+# 飞书API（可选，当前使用requests直接调用）
+# lark-sdk>=1.0.0
+
+# AI服务（可选）
+# openai>=1.0.0  # 可选，用于AI引导和生成
+
+# 图像处理
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# 工具库
+pydantic>=2.0.0
+typing-extensions>=4.8.0
+
+# 开发工具（可选）
+# pytest>=7.4.0
+# black>=23.0.0
+
