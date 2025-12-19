@@ -20,6 +20,28 @@ os.environ.setdefault('FEISHU_FEEDBACK_TABLE_ID', os.getenv('FEISHU_FEEDBACK_TAB
 os.environ.setdefault('DOUBAO_API_KEY', os.getenv('DOUBAO_API_KEY', ''))
 os.environ.setdefault('DEEPSEEK_API_KEY', os.getenv('DEEPSEEK_API_KEY', ''))
 
+# 在导入main之前，先创建config模块（避免main.py导入config时失败）
+if 'config' not in sys.modules:
+    import types
+    config = types.ModuleType('config')
+    config.FEISHU_APP_ID = os.getenv('FEISHU_APP_ID', '')
+    config.FEISHU_APP_SECRET = os.getenv('FEISHU_APP_SECRET', '')
+    config.FEISHU_APP_TOKEN = os.getenv('FEISHU_APP_TOKEN', '')
+    config.FEISHU_TABLE_ID = os.getenv('FEISHU_TABLE_ID', '')
+    config.FEISHU_FEEDBACK_TABLE_ID = os.getenv('FEISHU_FEEDBACK_TABLE_ID', '')
+    config.DOUBAO_API_KEY = os.getenv('DOUBAO_API_KEY', '')
+    config.DOUBAO_API_URL = os.getenv('DOUBAO_API_URL', 'https://ark.cn-beijing.volces.com/api/v3/chat/completions')
+    config.DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+    config.DEEPSEEK_API_URL = os.getenv('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1')
+    config.OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+    config.OPENAI_BASE_URL = os.getenv('OPENAI_BASE_URL', 'https://api.openai.com/v1')
+    config.APP_NAME = os.getenv('APP_NAME', '错题思维')
+    config.APP_VERSION = os.getenv('APP_VERSION', '1.0.0')
+    config.DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+    config.UPLOAD_DIR = os.getenv('UPLOAD_DIR', '/tmp')
+    config.MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', str(10 * 1024 * 1024)))
+    sys.modules['config'] = config
+
 # 延迟导入，避免初始化时出错
 app = None
 
@@ -28,38 +50,7 @@ def get_app():
     global app
     if app is None:
         try:
-            # 创建虚拟config模块（如果config.py不存在）
-            if 'config' not in sys.modules:
-                import types
-                config = types.ModuleType('config')
-                config.FEISHU_APP_ID = os.getenv('FEISHU_APP_ID', '')
-                config.FEISHU_APP_SECRET = os.getenv('FEISHU_APP_SECRET', '')
-                config.FEISHU_APP_TOKEN = os.getenv('FEISHU_APP_TOKEN', '')
-                config.FEISHU_TABLE_ID = os.getenv('FEISHU_TABLE_ID', '')
-                config.FEISHU_FEEDBACK_TABLE_ID = os.getenv('FEISHU_FEEDBACK_TABLE_ID', '')
-                config.DOUBAO_API_KEY = os.getenv('DOUBAO_API_KEY', '')
-                config.DOUBAO_API_URL = os.getenv('DOUBAO_API_URL', 'https://ark.cn-beijing.volces.com/api/v3/chat/completions')
-                config.DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
-                config.DEEPSEEK_API_URL = os.getenv('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1')
-                config.OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
-                config.OPENAI_BASE_URL = os.getenv('OPENAI_BASE_URL', 'https://api.openai.com/v1')
-                config.APP_NAME = '错题思维'
-                config.APP_VERSION = '1.0.0'
-                config.DEBUG = False
-                config.UPLOAD_DIR = '/tmp'
-                config.MAX_FILE_SIZE = 10 * 1024 * 1024
-                sys.modules['config'] = config
-            else:
-                # 如果config模块已存在，更新环境变量
-                config = sys.modules['config']
-                config.FEISHU_APP_ID = os.getenv('FEISHU_APP_ID', getattr(config, 'FEISHU_APP_ID', ''))
-                config.FEISHU_APP_SECRET = os.getenv('FEISHU_APP_SECRET', getattr(config, 'FEISHU_APP_SECRET', ''))
-                config.FEISHU_APP_TOKEN = os.getenv('FEISHU_APP_TOKEN', getattr(config, 'FEISHU_APP_TOKEN', ''))
-                config.FEISHU_TABLE_ID = os.getenv('FEISHU_TABLE_ID', getattr(config, 'FEISHU_TABLE_ID', ''))
-                config.FEISHU_FEEDBACK_TABLE_ID = os.getenv('FEISHU_FEEDBACK_TABLE_ID', getattr(config, 'FEISHU_FEEDBACK_TABLE_ID', ''))
-                config.DOUBAO_API_KEY = os.getenv('DOUBAO_API_KEY', getattr(config, 'DOUBAO_API_KEY', ''))
-                config.DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', getattr(config, 'DEEPSEEK_API_KEY', ''))
-            
+            # config模块已经在模块级别创建，直接导入main
             from main import ErrorQuestionApp
             app = ErrorQuestionApp(enable_logging=False)
         except Exception as e:
