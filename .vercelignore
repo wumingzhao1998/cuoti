@@ -1,6 +1,7 @@
-# 忽略不需要部署到Vercel的文件
+# 忽略不需要部署到Vercel的文件和目录
 config.py
 .env
+.env.vercel
 *.log
 logs/
 uploads/
@@ -10,4 +11,18 @@ __pycache__/
 .DS_Store
 venv/
 env/
-
+ENV/
+.git/
+.gitignore
+README.md
+*.md
+!VERCEL*.md
+example.py
+test_basic.py
+quick_start.py
+tests/
+docs/
+*.example.py
+config.example.py
+requirements-full.txt
+requirements-vercel.txt
