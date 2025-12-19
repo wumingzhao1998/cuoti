@@ -1,0 +1,13 @@
+# 忽略不需要部署到Vercel的文件
+config.py
+.env
+*.log
+logs/
+uploads/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+venv/
+env/
+
