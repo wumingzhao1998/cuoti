@@ -35,6 +35,7 @@ ENV/
 # 配置文件
 config.py
 .env
+.env.vercel
 
 # 上传文件
 uploads/

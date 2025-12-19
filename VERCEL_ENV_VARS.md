@@ -44,9 +44,61 @@ DEEPSEEK_API_URL=https://api.deepseek.com/v1
 6. 点击 **Save**
 7. 重复步骤4-6，添加所有变量
 
-### 方法2：批量导入（如果支持）
+### 方法2：批量导入（推荐，快速）
 
-可以创建一个 `.env` 文件格式的文本，然后批量导入。
+使用Vercel CLI批量导入环境变量：
+
+#### 步骤1：安装Vercel CLI（如果未安装）
+
+```bash
+npm i -g vercel
+```
+
+#### 步骤2：登录Vercel
+
+```bash
+vercel login
+```
+
+#### 步骤3：进入项目目录并导入
+
+**Windows (PowerShell):**
+```powershell
+# 运行批量导入脚本
+.\vercel-env-import.ps1
+```
+
+**Linux/Mac (Bash):**
+```bash
+# 给脚本添加执行权限
+chmod +x vercel-env-import.sh
+
+# 运行批量导入脚本
+./vercel-env-import.sh
+```
+
+**或者手动逐个导入（如果脚本不可用）:**
+
+```bash
+# 从.env.vercel文件读取并导入
+cat .env.vercel | grep -v "^#" | grep -v "^$" | while IFS='=' read -r key value; do
+    echo "$value" | vercel env add "$key" production preview development
+done
+```
+
+**Windows PowerShell手动导入:**
+```powershell
+Get-Content .env.vercel | Where-Object { $_ -notmatch "^#" -and $_ -notmatch "^$" } | ForEach-Object {
+    $parts = $_ -split "=", 2
+    $key = $parts[0].Trim()
+    $value = $parts[1].Trim()
+    $value | vercel env add "$key" production preview development
+}
+```
+
+#### 步骤4：验证
+
+导入完成后，在Vercel Dashboard中验证所有变量是否已正确添加。
 
 ## 环境变量说明
 
